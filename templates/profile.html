@@ -1,0 +1,368 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="profile-container">
+  <!-- User Info -->
+  <section class="user-header">
+    <div class="user-avatar">👤</div>
+    <div class="user-info">
+      <h2>{{ user.name }}</h2>
+      <p class="user-email">{{ user.email }}</p>
+      <p class="user-since">Membre depuis le {{ user.registered_on.strftime('%d/%m/%Y') }}</p>
+    </div>
+  </section>
+
+  <!-- My Loans -->
+  <section class="section">
+    <h3>📤 Mes emprunts actifs</h3>
+    {% set active_loans = user.loans|selectattr('returned', 'equalto', False)|list %}
+    {% if active_loans %}
+      <div class="items-list">
+        {% for loan in active_loans %}
+        <div class="item-card">
+          <div class="item-icon">📖</div>
+          <div class="item-content">
+            <h4><a href="{{ url_for('book_detail', book_id=loan.book.id) }}">{{ loan.book.title }}</a></h4>
+            <p class="item-meta">{{ loan.book.author }}</p>
+            <div class="loan-dates">
+              <span class="date-badge">📅 Emprunté le {{ loan.borrowed_on.strftime('%d/%m/%Y') }}</span>
+              <span class="date-badge due">Retour le {{ loan.due_date.strftime('%d/%m/%Y') }}</span>
+            </div>
+          </div>
+          <div class="loan-actions">
+            <form method="post" action="{{ url_for('return_book') }}" style="display:inline">
+              <input type="hidden" name="loan_id" value="{{ loan.id }}">
+              <button type="submit" class="btn-return">✓ Retourner</button>
+            </form>
+            <form method="post" action="{{ url_for('cancel_loan', loan_id=loan.id) }}" style="display:inline">
+              <button type="submit" class="btn-cancel" onclick="return confirm('Annuler cet emprunt ?')">❌ Annuler</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>✨ Vous n'avez pas d'emprunt actif</p>
+        <a href="/books" class="btn-action">📖 Parcourir les livres</a>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- My Reservations -->
+  <section class="section">
+    <h3>🔖 Mes réservations</h3>
+    {% set active_reservations = user.reservations|selectattr('active', 'equalto', True)|list %}
+    {% if active_reservations %}
+      <div class="items-list">
+        {% for res in active_reservations %}
+        <div class="item-card">
+          <div class="item-icon">🔖</div>
+          <div class="item-content">
+            <h4><a href="{{ url_for('book_detail', book_id=res.book.id) }}">{{ res.book.title }}</a></h4>
+            <p class="item-meta">{{ res.book.author }}</p>
+            <div class="res-status">
+              <span class="status-badge">Réservé le {{ res.reserved_on.strftime('%d/%m/%Y') }}</span>
+              {% if res.book.available_copies() > 0 %}
+                <span class="badge success">Disponible!</span>
+              {% else %}
+                <span class="badge warning">En attente</span>
+              {% endif %}
+            </div>
+          </div>
+          <form method="post" action="{{ url_for('cancel_reservation', reservation_id=res.id) }}" style="display:inline">
+            <button type="submit" class="btn-cancel" onclick="return confirm('Annuler cette réservation ?')">❌ Annuler</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>✨ Vous n'avez pas de réservation</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Loan History -->
+  <section class="section">
+    <h3>📥 Historique des emprunts</h3>
+    {% set returned_loans = user.loans|selectattr('returned', 'equalto', True)|list %}
+    {% if returned_loans %}
+      <div class="items-list">
+        {% for loan in returned_loans[:5] %}
+        <div class="item-card returned">
+          <div class="item-icon">✓</div>
+          <div class="item-content">
+            <h4>{{ loan.book.title }}</h4>
+            <p class="item-meta">{{ loan.book.author }}</p>
+            <p class="item-meta small">Emprunté du {{ loan.borrowed_on.strftime('%d/%m/%Y') }} au {{ loan.due_date.strftime('%d/%m/%Y') }}</p>
+          </div>
+          <span class="badge success">Retourné</span>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="empty-message">Aucun historique d'emprunt</p>
+    {% endif %}
+  </section>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <a href="/books" class="btn-primary">📖 Parcourir les livres</a>
+    <a href="/" class="btn-secondary">← Retour à l'accueil</a>
+  </div>
+</div>
+
+<style scoped>
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.user-header {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.user-avatar {
+  font-size: 64px;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  color: white;
+}
+
+.user-info h2 {
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.user-email, .user-since {
+  color: #999;
+  font-size: 14px;
+  margin: 3px 0;
+}
+
+.section {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.section h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #667eea;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-card {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s;
+}
+
+.item-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(5px);
+}
+
+.item-card.returned {
+  border-left-color: #28a745;
+  opacity: 0.8;
+}
+
+.item-icon {
+  font-size: 32px;
+  min-width: 45px;
+  text-align: center;
+}
+
+.item-content {
+  flex: 1;
+}
+
+.item-content h4 {
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.item-content h4 a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.item-content h4 a:hover {
+  text-decoration: underline;
+}
+
+.item-meta {
+  color: #999;
+  font-size: 13px;
+  margin: 3px 0;
+}
+
+.item-meta.small {
+  font-size: 12px;
+}
+
+.loan-dates, .res-status {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.date-badge, .status-badge {
+  font-size: 12px;
+  color: #666;
+  background: #e8e8e8;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.date-badge.due {
+  color: #dc3545;
+  background: #ffe0e0;
+  font-weight: 600;
+}
+
+.btn-return {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+}
+
+.btn-return:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+.btn-cancel {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+}
+
+.btn-cancel:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+.loan-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.empty-state p {
+  color: #999;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.btn-action {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.btn-action:hover {
+  background: #764ba2;
+  transform: translateY(-2px);
+}
+
+.empty-message {
+  text-align: center;
+  color: #999;
+  padding: 30px;
+  font-style: italic;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary, .btn-secondary {
+  padding: 12px 25px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 2px solid #667eea;
+}
+
+.btn-secondary:hover {
+  background: #667eea;
+  color: white;
+}
+</style>
+
+{% endblock %}

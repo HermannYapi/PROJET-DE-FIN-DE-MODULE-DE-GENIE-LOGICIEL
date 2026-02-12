@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <div class="search-results-container">
+    <h2>🔍 Résultats de recherche</h2>
+    <p class="search-query">Recherche pour: <strong>"{{ query }}"</strong></p>
+    
+    {% if books %}
+      <div class="results-count">{{ books|length }} résultat(s) trouvé(s)</div>
+      <div class="search-results">
+        {% for b in books %}
+        <div class="result-item">
+          <div class="result-icon">📖</div>
+          <div class="result-content">
+            <h3><a href="{{ url_for('book_detail', book_id=b.id) }}">{{ b.title }}</a></h3>
+            <p class="result-author">{{ b.author }}</p>
+            <div class="result-meta">
+              <span class="copies">📚 {{ b.total_copies }} copie(s)</span>
+              <span class="available">
+                {% if b.available_copies() > 0 %}
+                  <span class="badge success">{{ b.available_copies() }} disponible(s)</span>
+                {% else %}
+                  <span class="badge danger">Non disponible</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          <a href="{{ url_for('book_detail', book_id=b.id) }}" class="result-link">→</a>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="no-results">
+        <p>😔 Aucun ouvrage ne correspond à votre recherche.</p>
+        <a href="/" class="btn-back">← Retour à l'accueil</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

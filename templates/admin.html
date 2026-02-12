@@ -1,0 +1,172 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <h2>⚙️ Panneau d'administration</h2>
+
+  <div class="admin-container">
+    <!-- Section Emprunts Actifs -->
+    <section class="admin-section">
+      <h3>📤 Emprunts actifs</h3>
+      {% if active_loans %}
+        <table>
+          <thead>\n            <tr>\n              <th>ID</th>\n              <th>Usager</th>\n              <th>Livre</th>\n              <th>Emprunté le</th>\n              <th>Date limite</th>\n              <th>Statut</th>\n              <th>Actions</th>\n            </tr>
+          </thead>
+          <tbody>
+            {% for loan in active_loans %}
+            <tr>
+              <td>{{ loan.id }}</td>
+              <td>{{ loan.user.name }}</td>
+              <td>{{ loan.book.title }}</td>
+              <td>{{ loan.borrowed_on.strftime('%d/%m/%Y') }}</td>
+              <td>
+                <span class="date {% if loan.due_date < now %}overdue{% endif %}">
+                  {{ loan.due_date.strftime('%d/%m/%Y') }}
+                </span>
+              </td>
+              <td>
+                {% if loan.due_date < now %}
+                  <span class="badge danger">En retard</span>
+                {% else %}
+                  <span class="badge success">En cours</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="post" action="{{ url_for('return_book') }}" style="display:inline">
+                  <input type="hidden" name="loan_id" value="{{ loan.id }}">
+                  <button type="submit" class="btn-small">✓ Retour</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-message">Aucun emprunt actif</p>
+      {% endif %}
+    </section>
+
+    <!-- Section Réservations -->
+    <section class="admin-section">
+      <h3>🔖 Réservations en attente</h3>
+      {% if reservations %}
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usager</th>
+              <th>Livre</th>
+              <th>Réservé le</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for res in reservations %}
+            <tr>
+              <td>{{ res.id }}</td>
+              <td>{{ res.user.name }}</td>
+              <td>{{ res.book.title }}</td>
+              <td>{{ res.reserved_on.strftime('%d/%m/%Y') }}</td>
+              <td>
+                {% if res.active %}
+                  <span class="badge warning">En attente</span>
+                {% else %}
+                  <span class="badge success">Complétée</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if res.active %}
+                  <button class="btn-small danger-btn" onclick="alert('Créer un emprunt pour cette réservation')">→ Emprunt</button>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-message">Aucune réservation</p>
+      {% endif %}
+    </section>
+
+    <!-- Section Historique des retours -->
+    <section class="admin-section">
+      <h3>📥 Retours récents</h3>
+      {% if returned_loans %}
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usager</th>
+              <th>Livre</th>
+              <th>Emprunté</th>
+              <th>Date limite</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for loan in returned_loans %}
+            <tr>
+              <td>{{ loan.id }}</td>
+              <td>{{ loan.user.name }}</td>
+              <td>{{ loan.book.title }}</td>
+              <td>{{ loan.borrowed_on.strftime('%d/%m/%Y') }}</td>
+              <td>{{ loan.due_date.strftime('%d/%m/%Y') }}</td>
+              <td>
+                <span class="success">✓ Retourné</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-message">Aucun retour récent</p>
+      {% endif %}
+    </section>
+
+    <!-- Section Statistiques des Réservations -->
+    <section class="admin-section reservations-stats">
+      <h3>📊 Statistiques des réservations</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">{{ reservations|length }}</div>
+          <div class="stat-label">Réservations totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ reservations|selectattr('active')|list|length }}</div>
+          <div class="stat-label">En attente</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ reservations|rejectattr('active')|list|length }}</div>
+          <div class="stat-label">Complétées</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ reservations|map(attribute='user_id')|unique|list|length }}</div>
+          <div class="stat-label">Usagers uniques</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section Statistiques Globales -->
+    <section class="admin-section stats-section">
+      <h3>📊 Statistiques</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">{{ total_books }}</div>
+          <div class="stat-label">Livres total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ total_users }}</div>
+          <div class="stat-label">Usagers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ active_loans_count }}</div>
+          <div class="stat-label">Emprunts actifs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ reservations_count }}</div>
+          <div class="stat-label">Réservations</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+{% endblock %}

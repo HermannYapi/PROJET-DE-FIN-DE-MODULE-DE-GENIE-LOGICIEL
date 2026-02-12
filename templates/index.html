@@ -1,0 +1,118 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="index-container">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2 class="hero-title">🌟 BIENVENUE À LA BIBLIOTHÈQUE</h2>
+      <p class="hero-subtitle">Gérez votre bibliothèque facilement et efficacement</p>
+    </div>
+  </section>
+
+  <!-- Stats Cards -->
+  <section class="stats-cards">
+    <div class="stat-item">
+      <div class="stat-icon">📖</div>
+      <div class="stat-body">
+        <div class="stat-value" id="stat-books">{{ total_books }}</div>
+        <div class="stat-name">Ouvrages</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">👥</div>
+      <div class="stat-body">
+        <div class="stat-value" id="stat-users">{{ total_users }}</div>
+        <div class="stat-name">Adhérents</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">🔄</div>
+      <div class="stat-body">
+        <div class="stat-value" id="stat-loans">{{ active_loans }}</div>
+        <div class="stat-name">Emprunts actifs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="quick-actions">
+    <h3>⚡ ACTIONS RAPIDES</h3>
+    <div class="actions-grid">
+      <a href="/books" class="action-btn">
+        <span class="action-icon">📋</span>
+        <span class="action-text">Lister les ouvrages</span>
+      </a>
+      <a href="/register" class="action-btn">
+        <span class="action-icon">➕</span>
+        <span class="action-text">Ajouter un usager</span>
+      </a>
+      <a href="/users" class="action-btn">
+        <span class="action-icon">👥</span>
+        <span class="action-text">Voir les usagers</span>
+      </a>
+      <a href="/admin" class="action-btn">
+        <span class="action-icon">📊</span>
+        <span class="action-text">Gestion admin</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h3>⭐ FONCTIONNALITÉS</h3>
+    <div class="features-grid">
+      <div class="feature-box">
+        <div class="feature-icon">💾</div>
+        <h4>Gestion des livres</h4>
+        <p>Consultez, empruntez et gérez facilement tous vos ouvrages</p>
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">🔍</div>
+        <h4>Recherche avancée</h4>
+        <p>Trouvez rapidement vos livres par titre ou auteur</p>
+      </div>
+      <div class="feature-box">
+        <div class="feature-icon">📊</div>
+        <h4>Statistiques</h4>
+        <p>Suivez les emprunts et réservations en temps réel</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Search Section -->
+  <section class="search-section">
+    <h3>🔍 RECHERCHER UN OUVRAGE</h3>
+    <form method="get" action="/search" class="search-form">
+      <input type="text" name="q" class="search-input" placeholder="Titre ou auteur..." required>
+      <button type="submit" class="search-btn">🔎 Rechercher</button>
+    </form>
+  </section>
+
+  <!-- Recent Books -->
+  <section class="recent-books">
+    <h3>📚 OUVRAGES RÉCENTS</h3>
+    <div class="books-list" id="books-container">
+      {% if books %}
+        {% for b in books[:6] %}
+        <div class="book-card">
+          <div class="book-cover">📖</div>
+          <div class="book-info">
+            <h4><a href="{{ url_for('book_detail', book_id=b.id) }}">{{ b.title }}</a></h4>
+            <p class="author">{{ b.author }}</p>
+            <p class="availability">
+              {% if b.available_copies() > 0 %}
+                <span class="badge success">{{ b.available_copies() }} disponible(s)</span>
+              {% else %}
+                <span class="badge danger">Non disponible</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<script src="/static/app.js"></script>
+{% endblock %}

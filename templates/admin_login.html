@@ -1,0 +1,214 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="login-container">
+  <section class="login-box">
+    <div class="login-header">
+      <h2>🔐 Espace Administrateur</h2>
+      <p>Accès réservé aux administrateurs</p>
+    </div>
+
+    <form method="post" action="{{ url_for('admin_login') }}" class="login-form">
+      <div class="form-group">
+        <label for="password">Mot de passe administrateur</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          placeholder="••••••••" 
+          required
+          autofocus
+          class="form-input"
+        >
+      </div>
+
+      <button type="submit" class="btn-login">🔓 Se connecter</button>
+    </form>
+
+    <div class="login-footer">
+      <p>Vous n'êtes pas administrateur ?</p>
+      <a href="/">← Retour à l'accueil</a>
+    </div>
+  </section>
+
+  <section class="login-info">
+    <div class="info-card">
+      <h3>🛡️ Pourquoi un accès sécurisé ?</h3>
+      <p>Les données des usagers sont confidentielles. Seuls les administrateurs peuvent :</p>
+      <ul>
+        <li>✓ Voir la liste des usagers</li>
+        <li>✓ Ajouter de nouveaux usagers</li>
+        <li>✓ Consulter les profils détaillés</li>
+        <li>✓ Gérer les emprunts et réservations</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<style scoped>
+.login-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.login-box {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h2 {
+  color: #667eea;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.login-header p {
+  color: #999;
+  font-size: 14px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+}
+
+.form-input {
+  padding: 12px 15px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-login {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-login:active {
+  transform: translateY(0);
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  color: #999;
+  font-size: 13px;
+}
+
+.login-footer a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+.login-info {
+  display: flex;
+  align-items: center;
+}
+
+.info-card {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.info-card p {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.info-card ul {
+  list-style: none;
+}
+
+.info-card li {
+  color: #666;
+  margin: 10px 0;
+  padding-left: 20px;
+  position: relative;
+}
+
+.info-card li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #667eea;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    grid-template-columns: 1fr;
+    margin: 30px auto;
+  }
+
+  .login-info {
+    display: none;
+  }
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+</style>
+
+{% endblock %}

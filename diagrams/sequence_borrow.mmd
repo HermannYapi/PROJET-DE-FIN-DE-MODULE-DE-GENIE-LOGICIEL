@@ -1,0 +1,17 @@
+%% Diagramme de séquence: Emprunt (Mermaid)
+```mermaid
+sequenceDiagram
+    participant U as Utilisateur
+    participant UI as Interface Web
+    participant S as Système (Flask)
+    participant DB as Base de données
+
+    U->>UI: Demande emprunt (book_id, user_id)
+    UI->>S: POST /borrow
+    S->>DB: vérifier disponibilité (Book.available_copies)
+    DB-->>S: copies disponibles
+    S->>DB: créer Loan
+    DB-->>S: Loan créé
+    S-->>UI: redirect /book/<id>
+    UI-->>U: page mise à jour
+```

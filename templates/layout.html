@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bibliothèque - Gestion</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <header>
+      <h1>📚 Gestion de bibliothèque</h1>
+      <nav>
+        <a href="/">🏠 Accueil</a>
+        {% if session.get('admin') %}
+          <a href="/books">📖 Ouvrages</a>
+          <a href="/users">👥 Usagers</a>
+          <a href="/reservations">🔖 Réservations</a>
+          <a href="/add_book">➕ Ajouter livre</a>
+          <a href="/register">📝 Inscription</a>
+          <a href="/admin">⚙️ Administration</a>
+          <a href="/admin/logout" class="nav-logout">🔓 Déconnexion</a>
+        {% else %}
+          <a href="/admin/login" class="nav-login">🔐 Admin</a>
+        {% endif %}
+      </nav>
+    </header>
+    <main>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flashes">
+            {% for category, msg in messages %}
+              <li class="{{ category }}">{{ msg }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+%% Diagramme de classes (Mermaid)
+```mermaid
+classDiagram
+    class User{
+      +int id
+      +string name
+      +string email
+      +active_loans_count()
+    }
+    class Book{
+      +int id
+      +string title
+      +string author
+      +int total_copies
+      +available_copies()
+    }
+    class Loan{
+      +int id
+      +datetime borrowed_on
+      +datetime due_date
+      +bool returned
+    }
+    class Reservation{
+      +int id
+      +datetime reserved_on
+      +bool active
+    }
+
+    User "1" -- "*" Loan
+    User "1" -- "*" Reservation
+    Book "1" -- "*" Loan
+    Book "1" -- "*" Reservation
+```
