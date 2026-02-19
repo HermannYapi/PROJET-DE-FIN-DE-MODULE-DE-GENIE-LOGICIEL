@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: bibliotheque-plateau
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.12.8
