@@ -2,8 +2,8 @@
 {% block content %}
 <div class="books-container">
   <div class="books-header">
-    <h2>📚 Liste des ouvrages</h2>
-    <a href="/add_book" class="btn-add-book">➕ Ajouter un ouvrage</a>
+    <h2>Liste des ouvrages</h2>
+    <a href="/add_book" class="btn-add-book">Ajouter un ouvrage</a>
   </div>
 
   {% if books %}
@@ -22,7 +22,11 @@
           {% for b in books %}
           <tr>
             <td class="title-cell">
-              <a href="{{ url_for('book_detail', book_id=b.id) }}">{{ b.title }}</a>
+              {% if user_can_view_details %}
+                <a href="{{ url_for('book_detail', book_id=b.id) }}">{{ b.title }}</a>
+              {% else %}
+                {{ b.title }}
+              {% endif %}
             </td>
             <td>{{ b.author }}</td>
             <td>
@@ -36,7 +40,36 @@
               {% endif %}
             </td>
             <td>
-              <a href="{{ url_for('book_detail', book_id=b.id) }}" class="action-link">Détails →</a>
+              {% if user_can_view_details %}
+                <a href="{{ url_for('book_detail', book_id=b.id) }}" class="action-link">Details -></a>
+              {% endif %}
+
+              {% if user_can_transact %}
+              <form method="post" action="{{ url_for('user_borrow') }}" onsubmit="return confirm('Emprunter ce livre avec votre compte usager ?');" style="display:inline; margin-left:8px;">
+                <input type="hidden" name="book_id" value="{{ b.id }}">
+                <button type="submit" class="btn-inline-action" {% if b.available_copies() <= 0 %}disabled{% endif %}>Emprunter</button>
+              </form>
+              <form method="post" action="{{ url_for('user_reserve') }}" onsubmit="return confirm('Reserver ce livre avec votre compte usager ?');" style="display:inline; margin-left:6px;">
+                <input type="hidden" name="book_id" value="{{ b.id }}">
+                <button type="submit" class="btn-inline-action secondary">Reserver</button>
+              </form>
+              {% else %}
+                {% if current_user and not current_user.approved %}
+                  <span class="badge warning" style="margin-left:8px;">Compte en attente de validation</span>
+                {% else %}
+                  {% if not user_can_view_details %}
+                    <span class="badge warning" style="margin-left:8px;">Details reserves aux usagers inscrits</span>
+                  {% endif %}
+                  <a href="{{ url_for('user_login') }}" class="action-link" style="margin-left:8px;">Connexion usager</a>
+                  <a href="{{ url_for('user_register') }}" class="action-link" style="margin-left:8px;">S'inscrire</a>
+                {% endif %}
+              {% endif %}
+
+              {% if session.get('admin') %}
+              <form method="post" action="{{ url_for('delete_book', book_id=b.id) }}" onsubmit="return confirm('Supprimer ce livre ? Cette action est definitive.');" style="display:inline; margin-left:8px;">
+                <button type="submit" class="btn-inline-delete">Supprimer</button>
+              </form>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}
@@ -45,8 +78,8 @@
     </div>
   {% else %}
     <div class="empty-state">
-      <p>Aucun livre dans la bibliothèque</p>
-      <a href="/add_book" class="btn-add-first">➕ Ajouter le premier livre</a>
+      <p>Aucun livre dans la bibliotheque</p>
+      <a href="/add_book" class="btn-add-first">Ajouter le premier livre</a>
     </div>
   {% endif %}
 </div>
@@ -147,6 +180,42 @@
   text-decoration: underline;
   transform: translateX(3px);
   display: inline-block;
+}
+
+.btn-inline-delete {
+  border: none;
+  background: #dc3545;
+  color: white;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-inline-delete:hover {
+  background: #c82333;
+}
+
+.btn-inline-action {
+  border: none;
+  background: #1f7a4f;
+  color: white;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-inline-action:hover {
+  background: #17643f;
+}
+
+.btn-inline-action.secondary {
+  background: #3b5ccc;
+}
+
+.btn-inline-action.secondary:hover {
+  background: #2f4bad;
 }
 
 .empty-state {

@@ -1,76 +1,95 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="book-detail-container">
-  <!-- Book Info Section -->
   <section class="book-header">
-    <div class="book-icon">📖</div>
+    <div class="book-icon">Livre</div>
     <div class="book-meta">
       <h2>{{ book.title }}</h2>
       <p class="author">{{ book.author }}</p>
       <div class="book-stats">
-        <span class="stat">📚 {{ book.total_copies }} copie(s) au total</span>
+        <span class="stat">{{ book.total_copies }} copie(s) au total</span>
         {% if book.available_copies() > 0 %}
-          <span class="stat available">✓ {{ book.available_copies() }} disponible(s)</span>
+          <span class="stat available">{{ book.available_copies() }} disponible(s)</span>
         {% else %}
-          <span class="stat unavailable">✗ Non disponible</span>
+          <span class="stat unavailable">Non disponible</span>
         {% endif %}
       </div>
     </div>
   </section>
 
-  <!-- Actions Section -->
   <section class="actions-section">
-    <div class="action-card">
-      <h3>📤 Emprunter un ouvrage</h3>
-      <form method="post" action="{{ url_for('borrow') }}" class="action-form">
-        <div class="form-group">
-          <label for="borrower">Sélectionnez l'usager</label>
-          <select name="user_id" id="borrower" required>
-            <option value="">-- Choisir un usager --</option>
-            {% for u in all_users %}
-              <option value="{{ u.id }}">{{ u.name }} (ID: {{ u.id }})</option>
-            {% endfor %}
-          </select>
-        </div>
-        <input type="hidden" name="book_id" value="{{ book.id }}">
-        {% if book.available_copies() > 0 %}
-          <button type="submit" class="btn-primary">✓ Emprunter</button>
-        {% else %}
-          <button type="submit" class="btn-disabled" disabled>Indisponible</button>
-        {% endif %}
-      </form>
-    </div>
+    {% if is_admin %}
+      <div class="action-card">
+        <h3>Emprunter un ouvrage</h3>
+        <form method="post" action="{{ url_for('borrow') }}" class="action-form">
+          <div class="form-group">
+            <label for="borrower">Selectionnez l'usager</label>
+            <select name="user_id" id="borrower" required>
+              <option value="">-- Choisir un usager --</option>
+              {% for u in all_users %}
+                <option value="{{ u.id }}">{{ u.name }} (ID: {{ u.id }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <input type="hidden" name="book_id" value="{{ book.id }}">
+          {% if book.available_copies() > 0 %}
+            <button type="submit" class="btn-primary">Emprunter</button>
+          {% else %}
+            <button type="submit" class="btn-disabled" disabled>Indisponible</button>
+          {% endif %}
+        </form>
+      </div>
 
-    <div class="action-card">
-      <h3>🔖 Réserver un ouvrage</h3>
-      <form method="post" action="{{ url_for('reserve') }}" class="action-form">
-        <div class="form-group">
-          <label for="reserver">Sélectionnez l'usager</label>
-          <select name="user_id" id="reserver" required>
-            <option value="">-- Choisir un usager --</option>
-            {% for u in all_users %}
-              <option value="{{ u.id }}">{{ u.name }} (ID: {{ u.id }})</option>
-            {% endfor %}
-          </select>
-        </div>
-        <input type="hidden" name="book_id" value="{{ book.id }}">
-        <button type="submit" class="btn-secondary">🔖 Réserver</button>
-      </form>
-    </div>
+      <div class="action-card">
+        <h3>Reserver un ouvrage</h3>
+        <form method="post" action="{{ url_for('reserve') }}" class="action-form">
+          <div class="form-group">
+            <label for="reserver">Selectionnez l'usager</label>
+            <select name="user_id" id="reserver" required>
+              <option value="">-- Choisir un usager --</option>
+              {% for u in all_users %}
+                <option value="{{ u.id }}">{{ u.name }} (ID: {{ u.id }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <input type="hidden" name="book_id" value="{{ book.id }}">
+          <button type="submit" class="btn-secondary">Reserver</button>
+        </form>
+      </div>
+    {% else %}
+      <div class="action-card">
+        <h3>Compte usager: {{ viewer_user.name }}</h3>
+        <p class="hint">Acces valide par email.</p>
+      </div>
+
+      <div class="action-card">
+        <h3>Actions usager</h3>
+        <form method="post" action="{{ url_for('user_borrow') }}" class="action-form">
+          <input type="hidden" name="book_id" value="{{ book.id }}">
+          {% if book.available_copies() > 0 %}
+            <button type="submit" class="btn-primary">Emprunter avec mon compte</button>
+          {% else %}
+            <button type="submit" class="btn-disabled" disabled>Indisponible</button>
+          {% endif %}
+        </form>
+        <form method="post" action="{{ url_for('user_reserve') }}" class="action-form">
+          <input type="hidden" name="book_id" value="{{ book.id }}">
+          <button type="submit" class="btn-secondary">Reserver avec mon compte</button>
+        </form>
+      </div>
+    {% endif %}
   </section>
 
-  <!-- Reservations Section -->
   <section class="reservations-section">
-    <h3>🔖 Réservations en attente</h3>
+    <h3>Reservations en attente</h3>
     {% if book.reservations|selectattr('active')|list %}
       <div class="reservations-list">
         {% for r in book.reservations %}
           {% if r.active %}
           <div class="reservation-item">
-            <div class="res-icon">👤</div>
             <div class="res-info">
               <strong>{{ r.user.name }}</strong>
-              <span class="res-date">Réservé le {{ r.reserved_on.strftime('%d/%m/%Y') }}</span>
+              <span class="res-date">Reserve le {{ r.reserved_on.strftime('%d/%m/%Y') }}</span>
             </div>
             <span class="badge warning">En attente</span>
           </div>
@@ -78,22 +97,20 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="empty-message">Aucune réservation pour cet ouvrage</p>
+      <p class="empty-message">Aucune reservation pour cet ouvrage</p>
     {% endif %}
   </section>
 
-  <!-- Current Loans Section -->
   <section class="loans-section">
-    <h3>📤 Emprunts en cours</h3>
+    <h3>Emprunts en cours</h3>
     {% set active_loans = book.loans|selectattr('returned', 'equalto', False)|list %}
     {% if active_loans %}
       <div class="loans-list">
         {% for loan in active_loans %}
         <div class="loan-item">
-          <div class="loan-icon">📤</div>
           <div class="loan-info">
             <strong>{{ loan.user.name }}</strong>
-            <span class="loan-date">Emprunté le {{ loan.borrowed_on.strftime('%d/%m/%Y') }}</span>
+            <span class="loan-date">Emprunte le {{ loan.borrowed_on.strftime('%d/%m/%Y') }}</span>
             <span class="loan-due">Retour le {{ loan.due_date.strftime('%d/%m/%Y') }}</span>
           </div>
           <span class="badge success">En cours</span>
@@ -124,9 +141,10 @@
 }
 
 .book-icon {
-  font-size: 64px;
   min-width: 80px;
   text-align: center;
+  font-weight: 700;
+  color: #667eea;
 }
 
 .book-meta h2 {
@@ -184,10 +202,16 @@
   border-bottom: 2px solid #667eea;
 }
 
+.hint {
+  color: #555;
+  margin: 0;
+}
+
 .action-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  margin-bottom: 12px;
 }
 
 .form-group {
@@ -287,11 +311,6 @@
   border-left: 4px solid #667eea;
 }
 
-.res-icon, .loan-icon {
-  font-size: 28px;
-  min-width: 40px;
-}
-
 .res-info, .loan-info {
   flex: 1;
 }
@@ -315,7 +334,6 @@
   padding: 20px;
   font-style: italic;
 }
-
 </style>
 
 {% endblock %}

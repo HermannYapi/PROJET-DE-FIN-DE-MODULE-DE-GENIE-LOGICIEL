@@ -3,6 +3,100 @@
   <h2>⚙️ Panneau d'administration</h2>
 
   <div class="admin-container">
+    <section class="admin-section">
+      <h3>Actions administrateur</h3>
+      <div class="stats-grid">
+        <div>
+          <h4>Inscrire un usager</h4>
+          <form method="post" action="{{ url_for('register') }}">
+            <label for="admin-register-name">Nom</label>
+            <input id="admin-register-name" name="name" type="text" required>
+            <label for="admin-register-email">Email</label>
+            <input id="admin-register-email" name="email" type="email" required>
+            <button type="submit" class="btn-small">Inscrire</button>
+          </form>
+        </div>
+
+        <div>
+          <h4>Creer un emprunt pour un usager inscrit</h4>
+          <form method="post" action="{{ url_for('borrow') }}">
+            <label for="admin-borrow-user">Usager inscrit</label>
+            <select id="admin-borrow-user" name="user_id" required>
+              <option value="">-- Choisir un usager --</option>
+              {% for user in approved_users %}
+                <option value="{{ user.id }}">{{ user.name }} ({{ user.email }})</option>
+              {% endfor %}
+            </select>
+
+            <label for="admin-borrow-book">Ouvrage</label>
+            <select id="admin-borrow-book" name="book_id" required>
+              <option value="">-- Choisir un ouvrage --</option>
+              {% for book in books %}
+                <option value="{{ book.id }}">{{ book.title }} - {{ book.author }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn-small">Faire emprunt</button>
+          </form>
+        </div>
+
+        <div>
+          <h4>Creer une reservation pour un usager inscrit</h4>
+          <form method="post" action="{{ url_for('reserve') }}">
+            <label for="admin-reserve-user">Usager inscrit</label>
+            <select id="admin-reserve-user" name="user_id" required>
+              <option value="">-- Choisir un usager --</option>
+              {% for user in approved_users %}
+                <option value="{{ user.id }}">{{ user.name }} ({{ user.email }})</option>
+              {% endfor %}
+            </select>
+
+            <label for="admin-reserve-book">Ouvrage</label>
+            <select id="admin-reserve-book" name="book_id" required>
+              <option value="">-- Choisir un ouvrage --</option>
+              {% for book in books %}
+                <option value="{{ book.id }}">{{ book.title }} - {{ book.author }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn-small">Faire reservation</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-section">
+      <h3>Inscriptions usagers en attente</h3>
+      {% if pending_users %}
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Demande le</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in pending_users %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.registered_on.strftime('%d/%m/%Y') }}</td>
+              <td>
+                <form method="post" action="{{ url_for('approve_user', user_id=user.id) }}" style="display:inline">
+                  <button type="submit" class="btn-small">Valider</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-message">Aucune inscription en attente.</p>
+      {% endif %}
+    </section>
+
     <!-- Section Emprunts Actifs -->
     <section class="admin-section">
       <h3>📤 Emprunts actifs</h3>
@@ -34,6 +128,12 @@
                   <input type="hidden" name="loan_id" value="{{ loan.id }}">
                   <button type="submit" class="btn-small">✓ Retour</button>
                 </form>
+                <form method="post" action="{{ url_for('extend_loan', loan_id=loan.id) }}" style="display:inline">
+                  <button type="submit" class="btn-small">+7j</button>
+                </form>
+                <form method="post" action="{{ url_for('cancel_loan', loan_id=loan.id) }}" style="display:inline">
+                  <button type="submit" class="btn-small danger-btn" onclick="return confirm('Interrompre cet emprunt ?')">Interrompre</button>
+                </form>
               </td>
             </tr>
             {% endfor %}
@@ -55,6 +155,8 @@
               <th>Usager</th>
               <th>Livre</th>
               <th>Réservé le</th>
+              <th>Expire le</th>
+              <th>Disponibilité</th>
               <th>Statut</th>
               <th>Actions</th>
             </tr>
@@ -67,15 +169,45 @@
               <td>{{ res.book.title }}</td>
               <td>{{ res.reserved_on.strftime('%d/%m/%Y') }}</td>
               <td>
+                {% if res.expires_on %}
+                  {{ res.expires_on.strftime('%d/%m/%Y') }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if res.book.available_copies() > 0 %}
+                  <span class="badge success">Disponible</span>
+                {% else %}
+                  <span class="badge danger">Indisponible</span>
+                {% endif %}
+              </td>
+              <td>
                 {% if res.active %}
-                  <span class="badge warning">En attente</span>
+                  {% if res.expires_on and res.expires_on < now %}
+                    <span class="badge danger">Expiree</span>
+                  {% else %}
+                    <span class="badge warning">En attente</span>
+                  {% endif %}
                 {% else %}
                   <span class="badge success">Complétée</span>
                 {% endif %}
               </td>
               <td>
                 {% if res.active %}
-                  <button class="btn-small danger-btn" onclick="alert('Créer un emprunt pour cette réservation')">→ Emprunt</button>
+                  <form method="post" action="{{ url_for('extend_reservation', reservation_id=res.id) }}" style="display:inline">
+                    <button type="submit" class="btn-small">+7j</button>
+                  </form>
+                  <form method="post" action="{{ url_for('cancel_reservation', reservation_id=res.id) }}" style="display:inline">
+                    <button type="submit" class="btn-small danger-btn" onclick="return confirm('Interrompre cette reservation ?')">Interrompre</button>
+                  </form>
+                  {% if res.book.available_copies() > 0 %}
+                    <form method="post" action="{{ url_for('fulfill_reservation', reservation_id=res.id) }}" style="display:inline">
+                      <button type="submit" class="btn-small">Convertir en emprunt</button>
+                    </form>
+                  {% else %}
+                    <span class="badge warning">En attente de retour</span>
+                  {% endif %}
                 {% endif %}
               </td>
             </tr>

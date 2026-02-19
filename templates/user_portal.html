@@ -1,0 +1,82 @@
+{% extends 'layout.html' %}
+{% block content %}
+<section class="admin-section">
+  <h3>Espace usager</h3>
+  <p>Bienvenue {{ user.name }}. Choisissez un livre puis empruntez ou reservez.</p>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+    <a href="{{ url_for('user_login') }}" class="btn-small" style="text-decoration:none;">Connexion usager</a>
+    <a href="{{ url_for('user_logout') }}" class="btn-small" style="text-decoration:none;">Deconnexion usager</a>
+  </div>
+</section>
+
+<section class="admin-section">
+  <h3>Catalogue</h3>
+  {% if books %}
+  <table>
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Auteur</th>
+        <th>Disponibles</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in books %}
+      <tr>
+        <td>{{ b.title }}</td>
+        <td>{{ b.author }}</td>
+        <td>
+          {% if b.available_copies() > 0 %}
+            <span class="badge success">{{ b.available_copies() }}</span>
+          {% else %}
+            <span class="badge danger">0</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="{{ url_for('user_borrow') }}" style="display:inline; margin:0;">
+            <input type="hidden" name="book_id" value="{{ b.id }}">
+            <button type="submit" class="btn-small" {% if b.available_copies() <= 0 %}disabled{% endif %}>Emprunter</button>
+          </form>
+          <form method="post" action="{{ url_for('user_reserve') }}" style="display:inline; margin:0;">
+            <input type="hidden" name="book_id" value="{{ b.id }}">
+            <button type="submit" class="btn-small">Reserver</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="empty-message">Aucun livre disponible.</p>
+  {% endif %}
+</section>
+
+<section class="admin-section">
+  <h3>Mes emprunts actifs</h3>
+  {% set my_active_loans = user.loans|selectattr('returned', 'equalto', False)|list %}
+  {% if my_active_loans %}
+    <ul>
+      {% for loan in my_active_loans %}
+        <li>{{ loan.book.title }} (retour: {{ loan.due_date.strftime('%d/%m/%Y') }})</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-message">Aucun emprunt actif.</p>
+  {% endif %}
+</section>
+
+<section class="admin-section">
+  <h3>Mes reservations actives</h3>
+  {% set my_active_res = user.reservations|selectattr('active', 'equalto', True)|list %}
+  {% if my_active_res %}
+    <ul>
+      {% for res in my_active_res %}
+        <li>{{ res.book.title }}{% if res.expires_on %} (expire: {{ res.expires_on.strftime('%d/%m/%Y') }}){% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-message">Aucune reservation active.</p>
+  {% endif %}
+</section>
+{% endblock %}
