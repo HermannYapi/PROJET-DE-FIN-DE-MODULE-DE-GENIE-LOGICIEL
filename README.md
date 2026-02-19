@@ -1,4 +1,4 @@
-# Système de gestion de bibliothèque (mini-app)
+# Gestion de la Bibliotheque de Plateau
 
 Ce dépôt contient une application Python minimaliste pour gérer une bibliothèque : emprunts, retours, réservations et gestion des usagers.
 
@@ -35,3 +35,19 @@ Fichiers principaux:
 
 
 # Code administracteur: Hermann48
+
+## Standard institutionnel (universite / ville)
+- Validation administrative des usagers (`approved` / `approved_on`)
+- Numero de carte usager (`card_number`)
+- Metadonnees bibliographiques standard (ISBN, editeur, annee, langue, categorie)
+- Politique de pret configurable (limites/durees via variables d environnement)
+- Journal d audit des actions critiques (`/admin/audit`)
+
+### Variables d environnement
+- `SECRET_KEY` (obligatoire en production)
+- `ADMIN_PASSWORD` (obligatoire en production)
+- `MAX_ACTIVE_LOANS` (defaut: 5)
+- `DEFAULT_LOAN_DAYS` (defaut: 14)
+- `DEFAULT_RESERVATION_DAYS` (defaut: 7)
+- `LOAN_EXTENSION_DAYS` (defaut: 7)
+- `RESERVATION_EXTENSION_DAYS` (defaut: 7)

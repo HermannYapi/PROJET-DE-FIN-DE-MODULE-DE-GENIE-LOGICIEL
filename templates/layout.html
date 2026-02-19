@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bibliothèque - Gestion</title>
+    <title>Gestion de la Bibliotheque de Plateau</title>
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
     <header>
-      <h1>📚 Gestion de bibliothèque</h1>
+      <h1>Gestion de la Bibliotheque de Plateau</h1>
       <nav>
         <a href="/">🏠 Accueil</a>
         {% if session.get('admin') %}
@@ -18,8 +18,15 @@
           <a href="/add_book">➕ Ajouter livre</a>
           <a href="/register">📝 Inscription</a>
           <a href="/admin">⚙️ Administration</a>
+          <a href="/admin/audit">Audit</a>
           <a href="/admin/logout" class="nav-logout">🔓 Déconnexion</a>
         {% else %}
+          <a href="{{ url_for('user_register') }}">Inscription usager</a>
+          <a href="{{ url_for('user_login') }}">Connexion usager</a>
+          {% if session.get('user_id') %}
+            <a href="{{ url_for('user_portal') }}">Espace usager</a>
+            <a href="{{ url_for('user_logout') }}">Deconnexion usager</a>
+          {% endif %}
           <a href="/admin/login" class="nav-login">🔐 Admin</a>
         {% endif %}
       </nav>

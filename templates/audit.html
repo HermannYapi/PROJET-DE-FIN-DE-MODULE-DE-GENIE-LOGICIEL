@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% set action_labels = {
+  'REGISTER_REQUESTED': 'Demande d inscription usager',
+  'BORROW_CREATED': 'Emprunt cree par usager',
+  'RESERVATION_CREATED': 'Reservation creee par usager',
+  'USER_CREATED_ADMIN': 'Usager cree par administration',
+  'USER_DELETED': 'Usager supprime',
+  'USER_APPROVED': 'Usager valide',
+  'BOOK_DELETED': 'Livre supprime',
+  'BORROW_CREATED_ADMIN': 'Emprunt cree par administration',
+  'LOAN_RETURNED': 'Emprunt retourne',
+  'LOAN_RETURNED_AND_RESERVATION_FULFILLED': 'Retour et conversion reservation en emprunt',
+  'RESERVATION_CREATED_ADMIN': 'Reservation creee par administration',
+  'LOAN_INTERRUPTED': 'Emprunt interrompu',
+  'RESERVATION_INTERRUPTED': 'Reservation interrompue',
+  'LOAN_EXTENDED': 'Emprunt prolonge',
+  'RESERVATION_EXTENDED': 'Reservation prolongee',
+  'RESERVATION_FULFILLED': 'Reservation convertie en emprunt'
+} %}
+<section class="admin-section">
+  <h3>Journal d audit (200 derniers evenements)</h3>
+  {% if logs %}
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Acteur</th>
+        <th>Action</th>
+        <th>Entite</th>
+        <th>Payload</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.created_on.strftime('%d/%m/%Y %H:%M:%S') }}</td>
+        <td>{{ log.actor_type }}{% if log.actor_id %}#{{ log.actor_id }}{% endif %}</td>
+        <td>{{ action_labels.get(log.action, log.action) }}</td>
+        <td>{{ log.entity_type }}{% if log.entity_id %}#{{ log.entity_id }}{% endif %}</td>
+        <td><code>{{ log.payload or '-' }}</code></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-message">Aucun evenement d audit.</p>
+  {% endif %}
+</section>
+{% endblock %}

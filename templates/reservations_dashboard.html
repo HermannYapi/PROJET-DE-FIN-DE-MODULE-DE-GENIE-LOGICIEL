@@ -68,6 +68,16 @@
               <span class="value">{{ res.reserved_on.strftime('%d/%m/%Y à %H:%M') }}</span>
             </div>
             <div class="info-row">
+              <span class="label">⏰ Expire le</span>
+              <span class="value">
+                {% if res.expires_on %}
+                  {{ res.expires_on.strftime('%d/%m/%Y à %H:%M') }}
+                {% else %}
+                  -
+                {% endif %}
+              </span>
+            </div>
+            <div class="info-row">
               <span class="label">📖 Disponibilité</span>
               <span class="value">
                 {% if res.book.available_copies() > 0 %}
@@ -81,6 +91,17 @@
           <div class="card-actions">
             <a href="{{ url_for('profile', user_id=res.user.id) }}" class="action-btn primary">👤 Voir le profil</a>
             <a href="{{ url_for('book_detail', book_id=res.book.id) }}" class="action-btn secondary">📖 Détails livre</a>
+            <form method="post" action="{{ url_for('extend_reservation', reservation_id=res.id) }}" style="margin:0;">
+              <button type="submit" class="action-btn secondary">+7j</button>
+            </form>
+            <form method="post" action="{{ url_for('cancel_reservation', reservation_id=res.id) }}" style="margin:0;">
+              <button type="submit" class="action-btn secondary" onclick="return confirm('Interrompre cette reservation ?')">Interrompre</button>
+            </form>
+            {% if res.book.available_copies() > 0 %}
+            <form method="post" action="{{ url_for('fulfill_reservation', reservation_id=res.id) }}" style="margin:0;">
+              <button type="submit" class="action-btn primary">Convertir en emprunt</button>
+            </form>
+            {% endif %}
           </div>
         </div>
         {% endfor %}

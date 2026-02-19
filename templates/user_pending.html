@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block content %}
+<section class="admin-section" style="max-width: 700px; margin: 0 auto;">
+  <h3>Demande en attente</h3>
+  {% if user %}
+    <p>Bonjour <strong>{{ user.name }}</strong>, votre compte est en attente de validation par l administration.</p>
+    <p>Email: {{ user.email }}</p>
+  {% else %}
+    <p>Votre demande d inscription est en attente de validation.</p>
+  {% endif %}
+  <p>Revenez ensuite sur <a href="{{ url_for('user_login') }}">connexion usager</a>.</p>
+</section>
+{% endblock %}

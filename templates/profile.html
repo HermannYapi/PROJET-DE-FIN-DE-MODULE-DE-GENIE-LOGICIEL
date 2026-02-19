@@ -29,6 +29,9 @@
             </div>
           </div>
           <div class="loan-actions">
+            <form method="post" action="{{ url_for('extend_loan', loan_id=loan.id) }}" style="display:inline">
+              <button type="submit" class="btn-return">+7j</button>
+            </form>
             <form method="post" action="{{ url_for('return_book') }}" style="display:inline">
               <input type="hidden" name="loan_id" value="{{ loan.id }}">
               <button type="submit" class="btn-return">✓ Retourner</button>
@@ -62,6 +65,9 @@
             <p class="item-meta">{{ res.book.author }}</p>
             <div class="res-status">
               <span class="status-badge">Réservé le {{ res.reserved_on.strftime('%d/%m/%Y') }}</span>
+              {% if res.expires_on %}
+                <span class="status-badge">Expire le {{ res.expires_on.strftime('%d/%m/%Y') }}</span>
+              {% endif %}
               {% if res.book.available_copies() > 0 %}
                 <span class="badge success">Disponible!</span>
               {% else %}
@@ -69,9 +75,14 @@
               {% endif %}
             </div>
           </div>
-          <form method="post" action="{{ url_for('cancel_reservation', reservation_id=res.id) }}" style="display:inline">
-            <button type="submit" class="btn-cancel" onclick="return confirm('Annuler cette réservation ?')">❌ Annuler</button>
-          </form>
+          <div class="loan-actions">
+            <form method="post" action="{{ url_for('extend_reservation', reservation_id=res.id) }}" style="display:inline">
+              <button type="submit" class="btn-return">+7j</button>
+            </form>
+            <form method="post" action="{{ url_for('cancel_reservation', reservation_id=res.id) }}" style="display:inline">
+              <button type="submit" class="btn-cancel" onclick="return confirm('Annuler cette réservation ?')">❌ Annuler</button>
+            </form>
+          </div>
         </div>
         {% endfor %}
       </div>

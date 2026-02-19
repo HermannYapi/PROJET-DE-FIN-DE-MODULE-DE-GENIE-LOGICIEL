@@ -1,5 +1,6 @@
 from app import app, db
 from models import User, Book
+from datetime import datetime
 
 books_data = [
     ('Le Petit Prince', 'Antoine de Saint-Exupéry', 3),
@@ -93,17 +94,32 @@ with app.app_context():
     
     # Ajouter les livres dynamiquement (sans duplicatas)
     added_books = 0
-    for title, author, copies in books_data:
+    for idx, (title, author, copies) in enumerate(books_data, start=1):
         if not Book.query.filter_by(title=title).first():
-            book = Book(title=title, author=author, total_copies=copies)
+            book = Book(
+                title=title,
+                author=author,
+                total_copies=copies,
+                language='Français',
+                category='General',
+                isbn=f'9780000{idx:06d}'
+            )
             db.session.add(book)
             added_books += 1
     
     # Ajouter les usagers dynamiquement (sans duplicatas)
     added_users = 0
-    for name, email in users_data:
+    for idx, (name, email) in enumerate(users_data, start=1):
         if not User.query.filter_by(email=email).first():
-            user = User(name=name, email=email)
+            user = User(
+                name=name,
+                email=email,
+                approved=True,
+                approved_on=datetime.utcnow(),
+                card_number=f'CARD-SEED-{idx:04d}',
+                affiliation='Public',
+                is_active=True
+            )
             db.session.add(user)
             added_users += 1
     

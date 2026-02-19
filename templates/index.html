@@ -4,8 +4,14 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h2 class="hero-title">🌟 BIENVENUE À LA BIBLIOTHÈQUE</h2>
-      <p class="hero-subtitle">Gérez votre bibliothèque facilement et efficacement</p>
+      <p class="hero-kicker">Gestion de la Bibliotheque de Plateau</p>
+      <h2 class="hero-title">Un point unique pour usagers et administration</h2>
+      <p class="hero-subtitle">Inscription, validation, emprunts, reservations et suivi en temps reel.</p>
+      <div class="hero-ctas">
+        <a href="{{ url_for('user_register') }}" class="hero-btn primary">Demande d inscription</a>
+        <a href="{{ url_for('user_portal') }}" class="hero-btn secondary">Espace usager</a>
+        <a href="/admin" class="hero-btn secondary">Tableau admin</a>
+      </div>
     </div>
   </section>
 
@@ -42,13 +48,13 @@
         <span class="action-icon">📋</span>
         <span class="action-text">Lister les ouvrages</span>
       </a>
-      <a href="/register" class="action-btn">
+      <a href="{{ url_for('user_register') }}" class="action-btn">
         <span class="action-icon">➕</span>
-        <span class="action-text">Ajouter un usager</span>
+        <span class="action-text">Inscription usager</span>
       </a>
-      <a href="/users" class="action-btn">
+      <a href="{{ url_for('user_portal') }}" class="action-btn">
         <span class="action-icon">👥</span>
-        <span class="action-text">Voir les usagers</span>
+        <span class="action-text">Espace usager</span>
       </a>
       <a href="/admin" class="action-btn">
         <span class="action-icon">📊</span>
@@ -57,25 +63,28 @@
     </div>
   </section>
 
-  <!-- Features -->
-  <section class="features">
-    <h3>⭐ FONCTIONNALITÉS</h3>
-    <div class="features-grid">
-      <div class="feature-box">
-        <div class="feature-icon">💾</div>
-        <h4>Gestion des livres</h4>
-        <p>Consultez, empruntez et gérez facilement tous vos ouvrages</p>
-      </div>
-      <div class="feature-box">
-        <div class="feature-icon">🔍</div>
-        <h4>Recherche avancée</h4>
-        <p>Trouvez rapidement vos livres par titre ou auteur</p>
-      </div>
-      <div class="feature-box">
-        <div class="feature-icon">📊</div>
-        <h4>Statistiques</h4>
-        <p>Suivez les emprunts et réservations en temps réel</p>
-      </div>
+  <!-- User/Admin Journey -->
+  <section class="quick-flow">
+    <h3>PARCOURS RAPIDE</h3>
+    <div class="flow-grid">
+      <article class="flow-card">
+        <h4>Cote usager</h4>
+        <ol>
+          <li>Demander une inscription</li>
+          <li>Attendre la validation admin</li>
+          <li>Se connecter et choisir un livre</li>
+          <li>Emprunter ou reserver</li>
+        </ol>
+      </article>
+      <article class="flow-card">
+        <h4>Cote administration</h4>
+        <ol>
+          <li>Valider les inscriptions en attente</li>
+          <li>Gerer livres, usagers, emprunts</li>
+          <li>Suivre reservations et retours</li>
+          <li>Consulter le journal d audit</li>
+        </ol>
+      </article>
     </div>
   </section>
 
